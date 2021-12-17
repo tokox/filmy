@@ -1,0 +1,24 @@
+[Wed Dec 15 06:24:32 2021] 192.168.0.13:58638 [200]: /
+[Wed Dec 15 18:55:55 2021] 192.168.0.13:34372 [200]: /
+[Wed Dec 15 18:55:55 2021] 192.168.0.13:34380 [200]: /?icon=
+[Wed Dec 15 18:55:58 2021] 192.168.0.13:34412 [200]: /
+[Wed Dec 15 18:55:58 2021] 192.168.0.13:34414 [200]: /?folder_icon=
+[Wed Dec 15 18:56:03 2021] 192.168.0.13:34456 [200]: /?m=Szpilki%20-%20Chcia%C5%82abym%20wi%C4%99cej
+[Wed Dec 15 18:56:04 2021] 192.168.0.13:34466 [200]: /?v=Szpilki%20-%20Chcia%C5%82abym%20wi%C4%99cej
+[Thu Dec 16 17:33:32 2021] 192.168.0.13:34840 [200]: /
+[Fri Dec 17 15:42:18 2021] PHP Warning:  file_get_contents(../users.json): failed to open stream: No such file or directory in /home/tomasz/moje programy/projects/filmy/public/index.php on line 2
+[Fri Dec 17 15:42:18 2021] PHP Warning:  file_get_contents(../wusers.json): failed to open stream: No such file or directory in /home/tomasz/moje programy/projects/filmy/public/index.php on line 3
+[Fri Dec 17 15:42:18 2021] PHP Warning:  file_get_contents(../movies.json): failed to open stream: No such file or directory in /home/tomasz/moje programy/projects/filmy/public/index.php on line 4
+[Fri Dec 17 15:42:18 2021] 192.168.0.13:34754 [200]: /
+[Fri Dec 17 15:42:18 2021] 192.168.0.13:34756 [404]: /favicon.svg - No such file or directory
+[Fri Dec 17 15:42:23 2021] PHP Fatal error:  Uncaught Error: Call to undefined function puser() in /home/tomasz/moje programy/projects/filmy/public/index.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/tomasz/moje programy/projects/filmy/public/index.php on line 12
+[Fri Dec 17 15:42:23 2021] 192.168.0.13:34798 [500]: / - Uncaught Error: Call to undefined function puser() in /home/tomasz/moje programy/projects/filmy/public/index.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/tomasz/moje programy/projects/filmy/public/index.php on line 12
+[Fri Dec 17 16:50:42 2021] PHP Notice:  Undefined variable: login in /home/tomasz/moje programy/projects/filmy/public/index.php on line 5
+[Fri Dec 17 16:50:42 2021] PHP Notice:  Undefined variable: logged in /home/tomasz/moje programy/projects/filmy/public/index.php on line 19
+[Fri Dec 17 16:50:42 2021] 192.168.0.13:40832 [200]: /
