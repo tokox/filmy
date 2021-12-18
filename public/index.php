@@ -1,55 +1,25 @@
 <?php
-$users = json_decode(file_get_contents("../users.json"), true);
-$wusers = json_decode(file_get_contents("../wusers.json"), true);
-$movies = json_decode(file_get_contents("../movies.json"), true);
-if($login == "admin") {
-	for($i = 0; $i < count($users); $i++) {
-		if(isset($_POST["a-{$i}-{$users[$i][0]}"])) {
-			auser($i);
-		} else if(isset($_POST["d-{$i}-{$users[$i][0]}"])) {
-			duser($i);
-		}
+function find_movie($movies, $code) {
+	$codes = explode('/', $code);
+	$akt = $movies;
+	while(count($codes)) {
+		if(!isset($movies[$codes[0]]))
+			return -1;
+		$akt = $movies[$codes[0]];
 	}
-	for($i = 0; $i < count($users); $i++) {
-		if(isset($_POST["r-{$i}-{$users[$i][0]}"])) {
-			ruser($i);
-		}
-	}
+	return $akt;
 }
-if(!$logged) {
-?>
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>filmy</title>
-<style>
-input[type=submit] {
-margin-right: 5px;
-margin-left: 5px;
+function get_data($file) {
+        return json_decode(file_get_contents("../data/".$file.".json"), true);
 }
-input[type=checkbox] {
-display: block;
-margin-left: auto;
+function set_data($file, $data) {
+        file_put_contents("../data/".$file.".json", json_encode($data, JSON_PRETTY_PRINT));
 }
-</style>
-<link rel="icon" sizes="any" type="image/svg+xml" href="/favicon.svg">
-</head>
-<body>
-<form method="post">
-<table>
-<tbody>
-<tr><td>Login: </td><td><input type="text" name="login"></td></tr>
-<tr><td>Hasło: </td><td><input type="password" name="password"></td></tr>
-<tr><td><input type="checkbox" name="remember"></td><td>Zapamiętaj mnie</td></tr>
-<tr><td colspan="2"><input type="submit" name="log_in" value="Zaloguj"><input type="submit" name="register" value="Zarejestruj"></td></tr>
-</tbody>
-</table>
-</form>
-</body>
-</html>
-<?php
-} else {
+if(isset($_COOKIE['logged_in'])) {
+	$hashes = get_data("hashes");
+	if(isset($hashes[$_COOKIE['logged_in']])) {
+		$users = get_data("users");
+		$user = $users[$hashes[$_COOKIE['logged_in']]];
 ?>
 <!doctype html>
 <html>
@@ -126,22 +96,19 @@ margin: 15px;
 nav:after {
 content: '';
 display: block;
-clear:both;
-}
-.admin_main {
-float: right;
+clear: both;
 }
 </style>
-<link rel="icon" sizes="any" type="image/svg+xml" href="?icon=">
+<link rel="icon" sizes="any" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
 <div class="panel">
-<a href="?logout=">Wyloguj</a>
+<a href="/logout.php">Wyloguj</a>
 <?php
-	if($login == "admin") {
+	if($user['special_permissions'] == "true") {
 ?>
 <span>|</span>
-<a href="?admin_view=">Widok admina</a>
+<a href="/admin.php">Widok admina</a>
 <?php
 	}
 ?>
@@ -149,79 +116,20 @@ float: right;
 <a href="/">Strona Główna</a>
 </div>
 <?php
-	if(isset($_GET['admin_view'])) {
-?>
-<form method="post">
-<table>
-<tbody>
-<?php
-		$wuserstoprint = wusers();
-		$userstoprint = users();
-		for($i = 0; $i < count($userstoprint) || $i < count($wuserstoprint); $i++) {
-			echo '<tr>';
-			if($i < count($userstoprint)) {
-				echo "<td>{$userstoprint[$i][0]}</td><td><input type=\"submit\" name=\"r-{$i}-{$userstoprint[$i][0]}\" value=\"Usuń\"></td>";
-			} else {
-				if($i == 0) {
-					echo "<td colspan=\"2\">Brak użytkowników</td>";
-				} else {
-					echo "<td></td><td></td>";
-				}
-			}
-			if($i < count($wuserstoprint)) {
-				echo "<td>{$wuserstoprint[$i][0]}</td><td><input type=\"submit\" name=\"a-{$i}-{$wuserstoprint[$i][0]}\" value=\"Akceptuj\"></td><td><input type=\"submit\" name=\"d-{$i}-{$wuserstoprint[$i][0]}\" value=\"Odrzuć\"></td>";
-			} else {
-				if($i == 0) {
-					echo "<td colspan=\"2\">Brak użytkowników</td>";
-				} else {
-					echo "<td></td><td></td>";
-				}
-			}
-			echo '</tr>';
-		}
-?>
-</table>
-</tbody>
-</form>
-<?php
-	} else {
 		$location = "";
-		if(isset($_GET['m'])) {
-			$location = str_replace("//", "/", str_replace(".mp4", "", str_replace("..", "", $_GET['m'])));
-		}
-		clearstatcache();
-		if(!is_readable("../filmy/".$location)) {
-			if(!is_readable("../filmy/".$location.".mp4")) {
-				$location = "";
-			} else
-				$location = $location.".mp4";
-		}
-		echo '<header>';
-		if(strlen($location)) {
-			$headers = explode("/", str_replace(".mp4", "", $location));
-			$header = "";
-			for($i = 0; $i < count($headers); $i++) {
-				$header = (strlen($header) ? $header."/" : "").$headers[$i];
-				if($i != 0)
-					echo ' » ';
-				echo "<a href=\"?m={$header}\">{$headers[$i]}</a>";
-			}
+		if(isset($_GET['m']))
+			$location = str_replace("//", "/", str_replace("..", "", $_GET['m']));
+		$movies = get_data("movies");
+		$movie = find_movie($movies, $location);
+		echo '<header><a href="?m=">Główna</a>';
+		$headers = explode("/", $location);
+		for($i = 0; $i < count($headers); $i++) {
+			echo ' » ';
+			echo "<a href=\"?m={$header}\">{$headers[$i]}</a>";
 		}
 		echo '</header>';
-		if(is_dir("../filmy/".$location)) {
-			$filmy = filmy($location);
-			echo '<ul>';
-			foreach($filmy as $film) {
-				if(is_dir("../filmy/".$film[0])) {
-					echo '</ul><ul class="folder">';
-					echo "<li><a href=\"?m={$film[0]}\">{$film[1]}</a></li>";
-					echo '</ul><ul>';
-				} else
-					echo "<li><a href=\"?m={$film[0]}\">{$film[1]}</a></li>";
-			}
-			echo '</ul>';
+		if() {
 		} else {
-			$location = str_replace(".mp4", "", $location);
 ?>
 <nav>
 <a href="?m=<?php echo $location; ?>&g=prev" class="prev">← Poprzedni</a>
@@ -234,7 +142,6 @@ float: right;
 <label>Powtarzaj: </label>
 <input type="radio" name="r" value="on" id="repeat-on"><label for="repeat-on">Tak</label>
 <input type="radio" name="r" value="off" id="repeat-off"><label for="repeat-off">Nie</label>
-</div>
 <a href="?m=<?php echo $location; ?>&g=next" class="next">Następny →</a>
 </nav>
 <video src="?v=<?php echo $location; ?>" controls autoplay preload></video>
@@ -245,8 +152,8 @@ float: right;
 </body>
 </html>
 <?php
+		exit;
+	}
 }
-file_put_contents("../users.json", json_encode($users, JSON_PRETTY_PRINT));
-file_put_contents("../wusers.json", json_encode($wusers, JSON_PRETTY_PRINT));
-file_put_contents("../movies.json", json_encode($movies, JSON_PRETTY_PRINT));
+header("Location: /login.php");
 ?>
