@@ -118,7 +118,7 @@ clear: both;
 <?php
 		$location = "";
 		if(isset($_GET['m']))
-			$location = str_replace("//", "/", str_replace("..", "", $_GET['m']));
+			$location = $_GET['m'];
 		$movies = get_data("movies");
 		$movie = find_movie($movies, $location);
 		echo '<header><a href="?m=">Główna</a>';
@@ -128,12 +128,10 @@ clear: both;
 			echo "<a href=\"?m={$header}\">{$headers[$i]}</a>";
 		}
 		echo '</header>';
-		if() {
-		} else {
 ?>
 <nav>
 <a href="?m=<?php echo $location; ?>&g=prev" class="prev">← Poprzedni</a>
-<form class="settings" style="display:none;">
+<form class="settings">
 <label>Przechodź dalej: </label>
 <input type="radio" name="n" id="next-off"><label for="next-off">Wył.</label>
 <input type="radio" name="n" id="next-folder"><label for="next-folder">Folder</label>
