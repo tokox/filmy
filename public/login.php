@@ -46,8 +46,8 @@ float: right;
 <form method="post">
 <table>
 <tbody>
-<tr><td>Login: </td><td><input type="text" name="login"></td></tr>
-<tr><td>Hasło: </td><td><input type="password" name="password"></td></tr>
+<tr><td>Login: </td><td><input type="text" name="login" required></td></tr>
+<tr><td>Hasło: </td><td><input type="password" name="password" required></td></tr>
 <tr><td><input type="checkbox" name="remember"></td><td>Zapamiętaj mnie</td></tr>
 <tr><td><input type="submit" name="log_in" value="Zaloguj"></td><td><a href="/register.php">Zarejestruj się</a></td></tr>
 </tbody>

@@ -153,7 +153,7 @@ clear: both;
 		} else if($movie["type"] == "directory") {
 			echo '<ul>';
 			foreach($movie["content"] as $name => $element) {
-				if(strlen($element["age_limit"]) == 0 || strlen($user["age"]) == 0 || intval($element["age_limit"]) <= intval($user["age"])) {
+				if(strlen($element["age_limit"]) == 0 || strlen($user["birthday"]) == 0 || intval($element["age_limit"]) <= intval($user["birthday"])) {
 					$path = (strlen($location)>0?$location.'/'.$name:$name);
 					echo "<li";
 					if($element["type"] == "directory")
