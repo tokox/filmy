@@ -10,6 +10,6 @@ if(isset($_COOKIE['logged_in'])) {
 	unset($hashes[$_COOKIE['logged_in']]);
 	setcookie("logged_in", "");
 	set_data("hashes", $hashes);
-	header("Location: /");
+	header("Location: /login.php");
 }
 ?>

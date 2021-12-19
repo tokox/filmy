@@ -9,7 +9,7 @@ if(isset($_POST['register']) && isset($_POST['login']) && isset($_POST['password
 	$users = get_data("users");
 	$wusers = get_data("wusers");
 	if(!isset($users[$_POST['login']]) && !isset($wusers[$_POST['login']]) && strlen($_POST['login']) >= 3 && strlen($_POST['login']) <= 256 && strlen($_POST['password']) >= 8 && strlen($_POST['password']) <= 256 && preg_match("/^\w+$/", $_POST['login']) && (isset($_POST['name'])?preg_match("/^[a-zA-Z ]+$/", $_POST['name']):true)) {
-		$wusers[$_POST['login']] = ["hash_password" => strval(password_hash($_POST['password'], PASSWORD_DEFAULT)), "age" => strval(isset($_POST['age'])?$_POST['age']:"0"), "name" => strval(isset($_POST['name'])?$_POST['name']:""), "special_permissions" => "false", "favourite" => []];
+		$wusers[$_POST['login']] = ["hash_password" => strval(password_hash($_POST['password'], PASSWORD_DEFAULT)), "age" => strval(isset($_POST['age'])&&is_int($_POST['age'])?$_POST['age']:"17"), "name" => strval(isset($_POST['name'])?$_POST['name']:""), "special_permissions" => "false", "favourite" => []];
 		set_data("wusers", $wusers);
 		header("Location: /login.php");
 		exit;

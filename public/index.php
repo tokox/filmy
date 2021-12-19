@@ -1,13 +1,13 @@
 <?php
 function find_movie($movies, $code) {
 	$codes = explode('/', $code);
-	$akt = $movies;
-	while(count($codes)) {
-		if(!isset($movies[$codes[0]]))
+	for($i = 0; $i < count($codes) && strlen($code); $i++) {
+		$movies = $movies["content"];
+		if(!isset($movies[$codes[$i]]))
 			return -1;
-		$akt = $movies[$codes[0]];
+		$movies = $movies[$codes[$i]];
 	}
-	return $akt;
+	return $movies;
 }
 function get_data($file) {
         return json_decode(file_get_contents("../data/".$file.".json"), true);
@@ -27,7 +27,7 @@ if(isset($_COOKIE['logged_in'])) {
 <meta charset="utf-8">
 <title>filmy</title>
 <style>
-.panel {
+#panel {
 position: fixed;
 top: 0px;
 right: 0px;
@@ -71,10 +71,10 @@ margin-bottom: 3px;
 margin-left: 5px;
 margin-right: 5px;
 }
-.prev {
+#prev {
 float: left;
 }
-.next {
+#next {
 float: right;
 }
 .folder {
@@ -102,7 +102,7 @@ clear: both;
 <link rel="icon" sizes="any" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
-<div class="panel">
+<div id="panel">
 <a href="/logout.php">Wyloguj</a>
 <?php
 	if($user['special_permissions'] == "true") {
@@ -121,31 +121,48 @@ clear: both;
 			$location = $_GET['m'];
 		$movies = get_data("movies");
 		$movie = find_movie($movies, $location);
-		echo '<header><a href="?m=">Główna</a>';
-		$headers = explode("/", $location);
-		for($i = 0; $i < count($headers); $i++) {
-			echo ' » ';
-			echo "<a href=\"?m={$header}\">{$headers[$i]}</a>";
+		if($movie == -1) {
+			header("Location: /");
+			exit;
 		}
+		while($movie["type"] == "link")
+			$movie = find_movie($movies, $movie["content"]);
+		echo '<header><a href="/">Główna</a>';
+		$headers = explode("/", $location);
+		for($i = 0; $i < count($headers) && strlen($location); $i++)
+			echo " » <a href=\"?m={$location}\">{$headers[$i]}</a>";
 		echo '</header>';
+		if($movie["type"] == "video") {
 ?>
 <nav>
-<a href="?m=<?php echo $location; ?>&g=prev" class="prev">← Poprzedni</a>
-<form class="settings">
+<form id="settings">
+<button form="settings" type="submit" name="g" value="prev" id="prev">← Poprzedni</button>
 <label>Przechodź dalej: </label>
-<input type="radio" name="n" id="next-off"><label for="next-off">Wył.</label>
-<input type="radio" name="n" id="next-folder"><label for="next-folder">Folder</label>
-<input type="radio" name="n" id="next-all"><label for="next-all">Wszystko</label>
+<input type="radio" name="n" id="next-off" value="off"><label for="next-off">Wył.</label>
+<input type="radio" name="n" id="next-folder" value="folder"><label for="next-folder">Folder</label>
+<input type="radio" name="n" id="next-all" value="all"><label for="next-all">Wszystko</label>
 <span>|</span>
 <label>Powtarzaj: </label>
-<input type="radio" name="r" value="on" id="repeat-on"><label for="repeat-on">Tak</label>
-<input type="radio" name="r" value="off" id="repeat-off"><label for="repeat-off">Nie</label>
-<a href="?m=<?php echo $location; ?>&g=next" class="next">Następny →</a>
+<input type="radio" name="r" value="on" id="repeat-on" value="on"><label for="repeat-on">Tak</label>
+<input type="radio" name="r" value="off" id="repeat-off" value="off"><label for="repeat-off">Nie</label>
+<button form="settings" type="submit" name="g" value="next" id="next">Następny →</button>
+</form>
 </nav>
-<video src="?v=<?php echo $location; ?>" controls autoplay preload></video>
+<video src="/video.php?v=<?php echo $location; ?>" controls autoplay preload></video>
 <?php
+		} else if($movie["type"] == "directory") {
+			echo '<ul>';
+			foreach($movie["content"] as $name => $element) {
+				if(strlen($element["age_limit"]) == 0 || strlen($user["age"]) == 0 || intval($element["age_limit"]) <= intval($user["age"])) {
+					$path = (strlen($location)>0?$location.'/'.$name:$name);
+					echo "<li";
+					if($element["type"] == "directory")
+						echo ' class="folder"';
+					echo "><a href=\"?m={$path}\">{$name}</a></li>";
+				}
+			}
+			echo '</ul>';
 		}
-	}
 ?>
 </body>
 </html>

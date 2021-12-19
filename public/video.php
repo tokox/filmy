@@ -1,13 +1,13 @@
 <?php
 function find_movie($movies, $code) {
 	$codes = explode('/', $code);
-	$akt = $movies;
-	while(count($codes)) {
-		if(!isset($movies[$codes[0]]))
-			return -1;
-		$akt = $movies[$codes[0]];
+        for($i = 0; $i < count($codes) && strlen($code); $i++) {
+                $movies = $movies["content"];
+                if(!isset($movies[$codes[$i]]))
+                        return -1;
+		$movies = $movies[$codes[$i]];
 	}
-	return $akt;
+        return $movies;
 }
 function get_data($file) {
 	return json_decode(file_get_contents("../data/".$file.".json"), true);
@@ -23,9 +23,9 @@ if(isset($_COOKIE['logged_in'])) {
 			$users = get_data("users");
 			$user = $users[$hashes[$_COOKIE['logged_in']]];
 			$movies = get_data("movies");
-			$movie = find_movie($movies, $_GET['v']);
-			if(intval($movie['age_limit']) >= intval($user['age'])) {
-				return file_get_contents($movie['path']);
+			$movie = find_movie($movies, $_GET['v']);
+			if($movie != -1 && (strlen($movie['age_limit']) == 0 || strlen($user['age']) == 0 || intval($movie['age_limit']) <= intval($user['age']))) {
+				echo file_get_contents("../movies/".$movie['path']);
 			}
 		}
 	}
