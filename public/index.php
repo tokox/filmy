@@ -20,6 +20,15 @@ if(isset($_COOKIE['logged_in'])) {
 	if(isset($hashes[$_COOKIE['logged_in']])) {
 		$users = get_data("users");
 		$user = $users[$hashes[$_COOKIE['logged_in']]];
+		$repeat = "off";
+		$next = "off";
+		if(isset($_COOKIE[$hashes[$_COOKIE['logged_in']]]))
+			list($repeat, $next) = explode(',', $_COOKIE[$hashes[$_COOKIE['logged_in']]]);
+		if(isset($_GET['r']))
+			$repeat = $_GET['r'];
+		if(isset($_GET['n']))
+			$next = $_GET['n'];
+		setcookie($hashes[$_COOKIE['logged_in']], $repeat.','.$next, time()+60*60*24*30);
 ?>
 <!doctype html>
 <html>
@@ -98,12 +107,17 @@ content: '';
 display: block;
 clear: both;
 }
+#javascriptendbutton {
+display: none;
+}
 </style>
 <link rel="icon" sizes="any" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
 <div id="panel">
 <a href="/logout.php">Wyloguj</a>
+<span>|</span>
+<a href="/">Strona Główna</a>
 <?php
 	if($user['special_permissions'] == "true") {
 ?>
@@ -113,7 +127,7 @@ clear: both;
 	}
 ?>
 <span>|</span>
-<a href="/">Strona Główna</a>
+<a href="/upload.php">Dodaj film</a>
 </div>
 <?php
 		$location = "";
@@ -129,26 +143,39 @@ clear: both;
 			$movie = find_movie($movies, $movie["content"]);
 		echo '<header><a href="/">Główna</a>';
 		$headers = explode("/", $location);
-		for($i = 0; $i < count($headers) && strlen($location); $i++)
-			echo " » <a href=\"?m={$location}\">{$headers[$i]}</a>";
+		$header = "";
+		for($i = 0; $i < count($headers) && strlen($location); $i++) {
+			$header .= (strlen($header)?'/'.$headers[$i]:$headers[$i]);
+			echo " » <a href=\"?m={$header}\">{$headers[$i]}</a>";
+		}
 		echo '</header>';
 		if($movie["type"] == "video") {
+			$next_off_checked = ($next=="off"?"checked":"");
+			$next_folder_checked = ($next=="folder"?"checked":"");
+			$next_all_checked = ($next=="all"?"checked":"");
+			$repeat_off_checked = ($repeat=="off"?"checked":"");
+			$repeat_on_checked = ($repeat=="on"?"checked":"");
+			$autoplay = ((isset($_GET['e'])&&$repeat=="off"&&$next=="off")?"":"autoplay");
 ?>
 <nav>
 <form id="settings">
+<input type="hidden" name="m" value="<?php echo $location; ?>">
 <button form="settings" type="submit" name="g" value="prev" id="prev">← Poprzedni</button>
 <label>Przechodź dalej: </label>
-<input type="radio" name="n" id="next-off" value="off"><label for="next-off">Wył.</label>
-<input type="radio" name="n" id="next-folder" value="folder"><label for="next-folder">Folder</label>
-<input type="radio" name="n" id="next-all" value="all"><label for="next-all">Wszystko</label>
+<input type="radio" name="n" id="next-off" value="off" <?php echo $next_off_checked; ?>><label for="next-off">Wył.</label>
+<input type="radio" name="n" id="next-folder" value="folder" <?php echo $next_folder_checked; ?>><label for="next-folder">Folder</label>
+<input type="radio" name="n" id="next-all" value="all" <?php echo $next_all_checked; ?>><label for="next-all">Wszystko</label>
 <span>|</span>
 <label>Powtarzaj: </label>
-<input type="radio" name="r" value="on" id="repeat-on" value="on"><label for="repeat-on">Tak</label>
-<input type="radio" name="r" value="off" id="repeat-off" value="off"><label for="repeat-off">Nie</label>
+<input type="radio" name="r" value="off" id="repeat-off" value="off" <?php echo $repeat_off_checked; ?>><label for="repeat-off">Nie</label>
+<input type="radio" name="r" value="on" id="repeat-on" value="on" <?php echo $repeat_on_checked; ?>><label for="repeat-on">Tak</label>
+<span>|</span>
+<input type="submit" value="ok">
+<input type="submit" name="e" value="" id="javascriptendbutton">
 <button form="settings" type="submit" name="g" value="next" id="next">Następny →</button>
 </form>
 </nav>
-<video src="/video.php?v=<?php echo $location; ?>" controls autoplay preload></video>
+<video src="/video.php?v=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('javascriptendbutton').click()"></video>
 <?php
 		} else if($movie["type"] == "directory") {
 			echo '<ul>';
