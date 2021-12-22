@@ -166,10 +166,13 @@ display: none;
 			$next_all_checked = ($next=="all"?"checked":"");
 			$repeat_off_checked = ($repeat=="off"?"checked":"");
 			$repeat_on_checked = ($repeat=="on"?"checked":"");
-			$autoplay = ((isset($_GET['e'])&&$repeat=="off"&&$next=="off")?"":"autoplay");
 			$time = 0;
-			if(isset($_GET['t']) && $repeat=="off" && $next=="off" && !isset($_GET['e']))
+			if(isset($_GET['t']) && $next=="off" && !isset($_GET['e']))
 				$time = $_GET['t'];
+			$status = "play";
+			if(isset($_GET['s']) && $next=="off" && !isset($_GET['e']))
+				$status = $_GET['s'];
+			$autoplay = (((!isset($_GET['e'])&&$status=="stop")||(isset($_GET['e'])&&$repeat=="off"&&$next=="off"))?"":"autoplay");
 ?>
 <nav>
 <form id="settings">
@@ -190,10 +193,11 @@ display: none;
 <input type="submit" name="e" value="" id="end">
 <input type="hidden" name="v" value="<?php echo $volume; ?>" id="volume">
 <input type="hidden" name="t" value="<?php echo $time; ?>" id="time">
+<input type="hidden" name="s" value="<?php echo $status; ?>" id="status">
 <button form="settings" type="submit" name="g" value="next" id="next">Następny →</button>
 </form>
 </nav>
-<video src="/video.php?v=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('end').click()" onvolumechange="document.getElementById('volume').setAttribute('value', document.getElementsByTagName('video')[0].volume)" ontimeupdate="document.getElementById('time').setAttribute('value', document.getElementsByTagName('video')[0].currentTime)">
+<video src="/video.php?v=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('end').click()" onvolumechange="document.getElementById('volume').setAttribute('value', document.getElementsByTagName('video')[0].volume)" ontimeupdate="document.getElementById('time').setAttribute('value', document.getElementsByTagName('video')[0].currentTime)" onplay="document.getElementById('status').setAttribute('value', 'play')" onpause="document.getElementById('status').setAttribute('value', 'stop')">
 <script>
 document.getElementsByTagName('video')[0].volume = <?php echo $volume; ?>;
 document.getElementsByTagName('video')[0].currentTime = <?php echo $time; ?>;
