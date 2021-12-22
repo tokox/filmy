@@ -28,16 +28,13 @@ if(isset($_COOKIE['logged_in'])) {
 		$user = $users[$hashes[$_COOKIE['logged_in']]];
 		$repeat = "off";
 		$next = "off";
-		$volume = "0.5";
 		if(isset($_COOKIE[$hashes[$_COOKIE['logged_in']]]))
-			list($repeat, $next, $volume) = explode(',', $_COOKIE[$hashes[$_COOKIE['logged_in']]]);
+			list($repeat, $next) = explode(',', $_COOKIE[$hashes[$_COOKIE['logged_in']]]);
 		if(isset($_GET['r']))
 			$repeat = $_GET['r'];
 		if(isset($_GET['n']))
 			$next = $_GET['n'];
-		if(isset($_GET['v']))
-			$volume = $_GET['v'];
-		setcookie($hashes[$_COOKIE['logged_in']], $repeat.','.$next.','.$volume, time()+60*60*24*30);
+		setcookie($hashes[$_COOKIE['logged_in']], $repeat.','.$next, time()+60*60*24*30);
 ?>
 <!doctype html>
 <html>
@@ -118,8 +115,11 @@ content: '';
 display: block;
 clear: both;
 }
-#end {
+#javascriptendbutton {
 display: none;
+}
+button, input[type=button] {
+font-size: 0.9em;
 }
 </style>
 <link rel="icon" sizes="any" type="image/svg+xml" href="/favicon.svg">
@@ -167,15 +167,12 @@ display: none;
 			$repeat_off_checked = ($repeat=="off"?"checked":"");
 			$repeat_on_checked = ($repeat=="on"?"checked":"");
 			$autoplay = ((isset($_GET['e'])&&$repeat=="off"&&$next=="off")?"":"autoplay");
-			$time = 0;
-			if(isset($_GET['t']) && $repeat=="off" && $next=="off" && !isset($_GET['e']))
-				$time = $_GET['t'];
 ?>
 <nav>
 <form id="settings">
 <input type="hidden" name="m" value="<?php echo $location; ?>">
 <button form="settings" type="submit" name="g" value="prev" id="prev">← Poprzedni</button>
-<input type="submit" value="⟳ reload">
+<input type="submit" value="⟳">
 <span>|</span>
 <label>Przechodź dalej: </label>
 <input type="radio" name="n" id="next-off" value="off" <?php echo $next_off_checked; ?>><label for="next-off">Wył.</label>
@@ -187,18 +184,11 @@ display: none;
 <input type="radio" name="r" value="on" id="repeat-on" value="on" <?php echo $repeat_on_checked; ?>><label for="repeat-on">Tak</label>
 <span>|</span>
 <input type="submit" value="ok">
-<input type="submit" name="e" value="" id="end">
-<input type="hidden" name="v" value="<?php echo $volume; ?>" id="volume">
-<input type="hidden" name="t" value="<?php echo $time; ?>" id="time">
+<input type="submit" name="e" value="" id="javascriptendbutton">
 <button form="settings" type="submit" name="g" value="next" id="next">Następny →</button>
 </form>
 </nav>
-<video src="/video.php?v=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('end').click()" onvolumechange="document.getElementById('volume').setAttribute('value', document.getElementsByTagName('video')[0].volume)" ontimeupdate="document.getElementById('time').setAttribute('value', document.getElementsByTagName('video')[0].currentTime)">
-<script>
-document.getElementsByTagName('video')[0].volume = <?php echo $volume; ?>;
-document.getElementsByTagName('video')[0].currentTime = <?php echo $time; ?>;
-</script>
-</video>
+<video src="/video.php?v=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('javascriptendbutton').click()"></video>
 <?php
 		} else if($movie["type"] == "directory") {
 			echo '<ul>';
