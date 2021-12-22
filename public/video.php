@@ -1,13 +1,19 @@
 <?php
 function find_movie($movies, $code) {
-	$codes = explode('/', $code);
+        $codes = explode('/', $code);
+        $movie = $movies;
         for($i = 0; $i < count($codes) && strlen($code); $i++) {
-                $movies = $movies["content"];
-                if(!isset($movies[$codes[$i]]))
+                $movie = $movie["content"];
+                if(!isset($movie[$codes[$i]]))
                         return -1;
-		$movies = $movies[$codes[$i]];
-	}
-        return $movies;
+                $movie = $movie[$codes[$i]];
+                if($movie["type"] == "link") {
+                        $movie = find_movie($movies, $movie["content"]);
+                        if($movie == -1)
+                                return -1;
+                }
+        }
+        return $movie;
 }
 function get_data($file) {
 	return json_decode(file_get_contents("../data/".$file.".json"), true);
@@ -24,8 +30,6 @@ if(isset($_COOKIE['logged_in'])) {
 			$movies = get_data("movies");
 			$movie = find_movie($movies, $_GET['v']);
 			if($movie != -1) {
-				while($movie["type"] == "link")
-					$movie = find_movie($movies, $movie["content"]);
 				if($movie["type"] == "video") {
 					if(strlen($movie['age_limit']) == 0 || strlen($user['birthday']) == 0 || intval($movie['age_limit']) <= intval($user['birthday'])) {
 						header("Content-Type: ".$movie['mime_type']);

@@ -1,13 +1,19 @@
 <?php
 function find_movie($movies, $code) {
 	$codes = explode('/', $code);
+	$movie = $movies;
 	for($i = 0; $i < count($codes) && strlen($code); $i++) {
-		$movies = $movies["content"];
-		if(!isset($movies[$codes[$i]]))
+		$movie = $movie["content"];
+		if(!isset($movie[$codes[$i]]))
 			return -1;
-		$movies = $movies[$codes[$i]];
+		$movie = $movie[$codes[$i]];
+		if($movie["type"] == "link") {
+			$movie = find_movie($movies, $movie["content"]);
+			if($movie == -1)
+				return -1;
+		}
 	}
-	return $movies;
+	return $movie;
 }
 function get_data($file) {
         return json_decode(file_get_contents("../data/".$file.".json"), true);
@@ -70,6 +76,11 @@ li {
 font-size: large;
 margin-top: 7px;
 }
+img {
+height: 20px;
+margin: -2px;
+margin-right: 5px;
+}
 video {
 width: 100%;
 background-color: black;
@@ -85,9 +96,6 @@ float: left;
 }
 #next {
 float: right;
-}
-.folder {
-list-style-image: url("/folder.svg");
 }
 nav > div {
 display: inline-block;
@@ -128,6 +136,8 @@ display: none;
 ?>
 <span>|</span>
 <a href="/upload.php">Dodaj film</a>
+<span>|</span>
+<a href="/favourites.php">Ulubione</a>
 </div>
 <?php
 		$location = "";
@@ -139,8 +149,6 @@ display: none;
 			header("Location: /");
 			exit;
 		}
-		while($movie["type"] == "link")
-			$movie = find_movie($movies, $movie["content"]);
 		echo '<header><a href="/">Główna</a>';
 		$headers = explode("/", $location);
 		$header = "";
@@ -182,10 +190,15 @@ display: none;
 			foreach($movie["content"] as $name => $element) {
 				if(strlen($element["age_limit"]) == 0 || strlen($user["birthday"]) == 0 || intval($element["age_limit"]) <= intval($user["birthday"])) {
 					$path = (strlen($location)>0?$location.'/'.$name:$name);
-					echo "<li";
+					echo "<li><a href=\"?m={$path}\">";
 					if($element["type"] == "directory")
-						echo ' class="folder"';
-					echo "><a href=\"?m={$path}\">{$name}</a></li>";
+						echo '<img src="/folder.svg">';
+					if($element["type"] == "link")
+						echo '<img src="/link.svg">';
+					echo "{$name}";
+					if($element["type"] == "link")
+						echo " → {$element["content"]}";
+					echo "</a></li>";
 				}
 			}
 			echo '</ul>';
