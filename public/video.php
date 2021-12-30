@@ -33,7 +33,7 @@ if(isset($_COOKIE['logged_in'])) {
 				if($movie["type"] == "video") {
 					if(strlen($movie['age_limit']) == 0 || strlen($user['birthday']) == 0 || intval($movie['age_limit']) <= intval($user['birthday'])) {
 						header("Content-Type: ".$movie['mime_type']);
-						echo file_get_contents("../movies/".$movie['path']);
+						echo file_get_contents("../movies/".$movie['content']);
 					} else {
 						header("Content-Type: video/mp4");
 						echo file_get_contents("../data/video/age_limit_exceeded.mp4");

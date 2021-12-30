@@ -197,7 +197,7 @@ display: none;
 <button form="settings" type="submit" name="g" value="next" id="next">Następny →</button>
 </form>
 </nav>
-<video src="/video.php?v=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('end').click()" onvolumechange="document.getElementById('volume').setAttribute('value', document.getElementsByTagName('video')[0].volume)" ontimeupdate="document.getElementById('time').setAttribute('value', document.getElementsByTagName('video')[0].currentTime)" onplay="document.getElementById('status').setAttribute('value', 'play')" onpause="document.getElementById('status').setAttribute('value', 'stop')">
+<video src="/video.php?v=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('end').click()" onvolumechange="if(document.getElementsByTagName('video')[0].muted) document.getElementById('volume').setAttribute('value', 0); else document.getElementById('volume').setAttribute('value', document.getElementsByTagName('video')[0].volume)" ontimeupdate="document.getElementById('time').setAttribute('value', document.getElementsByTagName('video')[0].currentTime)" onplay="document.getElementById('status').setAttribute('value', 'play')" onpause="document.getElementById('status').setAttribute('value', 'stop')">
 <script>
 document.getElementsByTagName('video')[0].volume = <?php echo $volume; ?>;
 document.getElementsByTagName('video')[0].currentTime = <?php echo $time; ?>;
