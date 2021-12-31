@@ -84,7 +84,7 @@ height: 20px;
 margin: -2px;
 margin-right: 5px;
 }
-video {
+video, audio {
 width: 100%;
 background-color: black;
 }
@@ -117,9 +117,6 @@ nav:after {
 content: '';
 display: block;
 clear: both;
-}
-#end {
-display: none;
 }
 </style>
 <link rel="icon" sizes="any" type="image/svg+xml" href="/favicon.svg">
@@ -160,7 +157,7 @@ display: none;
 			echo " » <a href=\"?m={$header}\">{$headers[$i]}</a>";
 		}
 		echo '</header>';
-		if($movie["type"] == "video") {
+		if($movie["type"] == "video" || $movie["type"] == "audio") {
 			$next_off_checked = ($next=="off"?"checked":"");
 			$next_folder_checked = ($next=="folder"?"checked":"");
 			$next_all_checked = ($next=="all"?"checked":"");
@@ -190,13 +187,16 @@ display: none;
 <input type="radio" name="r" value="on" id="repeat-on" value="on" <?php echo $repeat_on_checked; ?>><label for="repeat-on">Tak</label>
 <span>|</span>
 <input type="submit" value="ok">
-<input type="submit" name="e" value="" id="end">
+<input type="submit" name="e" value="pomin →" id="end">
 <input type="hidden" name="v" value="<?php echo $volume; ?>" id="volume">
 <input type="hidden" name="t" value="<?php echo $time; ?>" id="time">
 <input type="hidden" name="s" value="<?php echo $status; ?>" id="status">
 <button form="settings" type="submit" name="g" value="next" id="next">Następny →</button>
 </form>
 </nav>
+<?php
+			if($movie["type"] == "video") {
+?>
 <video src="/video.php?v=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('end').click()" onvolumechange="if(document.getElementsByTagName('video')[0].muted) document.getElementById('volume').setAttribute('value', 0); else document.getElementById('volume').setAttribute('value', document.getElementsByTagName('video')[0].volume)" ontimeupdate="document.getElementById('time').setAttribute('value', document.getElementsByTagName('video')[0].currentTime)" onplay="document.getElementById('status').setAttribute('value', 'play')" onpause="document.getElementById('status').setAttribute('value', 'stop')">
 <script>
 document.getElementsByTagName('video')[0].volume = <?php echo $volume; ?>;
@@ -204,20 +204,31 @@ document.getElementsByTagName('video')[0].currentTime = <?php echo $time; ?>;
 </script>
 </video>
 <?php
+			} else if($movie["type"] == "audio") {
+?>
+<audio src="/audio.php?a=<?php echo $location; ?>" controls <?php echo $autoplay; ?> preload onended="document.getElementById('end').click()" onvolumechange="if(document.getElementsByTagName('audio')[0].muted) document.getElementById('volume').setAttribute('value', 0); else document.getElementById('volume').setAttribute('value', document.getElementsByTagName('audio')[0].volume)" ontimeupdate="document.getElementById('time').setAttribute('value', document.getElementsByTagName('audio')[0].currentTime)" onplay="document.getElementById('status').setAttribute('value', 'play')" onpause="document.getElementById('status').setAttribute('value', 'stop')">
+<script>
+document.getElementsByTagName('audio')[0].volume = <?php echo $volume; ?>;
+document.getElementsByTagName('audio')[0].currentTime = <?php echo $time; ?>;
+</script>
+</audio>
+<?php
+			}
 		} else if($movie["type"] == "directory") {
 			echo '<ul>';
 			foreach($movie["content"] as $name => $element) {
 				if(strlen($element["age_limit"]) == 0 || strlen($user["birthday"]) == 0 || intval($element["age_limit"]) <= intval($user["birthday"])) {
 					$path = (strlen($location)>0?$location.'/'.$name:$name);
-					echo "<li><a href=\"?m={$path}\">";
+					echo "<li><a href=\"?m={$path}\"><img src=\"/";
 					if($element["type"] == "directory")
-						echo '<img src="/folder.svg">';
+						echo 'folder';
 					if($element["type"] == "link")
-						echo '<img src="/link.svg">';
-					echo "{$name}";
-					if($element["type"] == "link")
-						echo " → {$element["content"]}";
-					echo "</a></li>";
+						echo 'link';
+					if($element["type"] == "video")
+						echo 'video';
+					if($element["type"] == "audio")
+						echo 'audio';
+					echo ".svg\">{$name}</a></li>";
 				}
 			}
 			echo '</ul>';
