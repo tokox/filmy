@@ -187,7 +187,8 @@ clear: both;
 <input type="radio" name="r" value="on" id="repeat-on" value="on" <?php echo $repeat_on_checked; ?>><label for="repeat-on">Tak</label>
 <span>|</span>
 <input type="submit" value="ok">
-<input type="submit" name="e" value="pomin →" id="end">
+<span>|</span>
+<input type="submit" name="e" value="pomiń →" id="end">
 <input type="hidden" name="v" value="<?php echo $volume; ?>" id="volume">
 <input type="hidden" name="t" value="<?php echo $time; ?>" id="time">
 <input type="hidden" name="s" value="<?php echo $status; ?>" id="status">
