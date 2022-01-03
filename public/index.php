@@ -159,7 +159,7 @@ clear: both;
 		echo '</header>';
 		if($movie["type"] == "video" || $movie["type"] == "audio") {
 			$next_off_checked = ($next=="off"?"checked":"");
-			$next_folder_checked = ($next=="folder"?"checked":"");
+			$next_directory_checked = ($next=="directory"?"checked":"");
 			$next_all_checked = ($next=="all"?"checked":"");
 			$repeat_off_checked = ($repeat=="off"?"checked":"");
 			$repeat_on_checked = ($repeat=="on"?"checked":"");
@@ -179,7 +179,7 @@ clear: both;
 <span>|</span>
 <label>Przechodź dalej: </label>
 <input type="radio" name="n" id="next-off" value="off" <?php echo $next_off_checked; ?>><label for="next-off">Wył.</label>
-<input type="radio" name="n" id="next-folder" value="folder" <?php echo $next_folder_checked; ?>><label for="next-folder">Folder</label>
+<input type="radio" name="n" id="next-directory" value="directory" <?php echo $next_directory_checked; ?>><label for="next-directory">Folder</label>
 <input type="radio" name="n" id="next-all" value="all" <?php echo $next_all_checked; ?>><label for="next-all">Wszystko</label>
 <span>|</span>
 <label>Powtarzaj: </label>
@@ -220,16 +220,8 @@ document.getElementsByTagName('audio')[0].currentTime = <?php echo $time; ?>;
 			foreach($movie["content"] as $name => $element) {
 				if(strlen($element["age_limit"]) == 0 || strlen($user["birthday"]) == 0 || intval($element["age_limit"]) <= intval($user["birthday"])) {
 					$path = (strlen($location)>0?$location.'/'.$name:$name);
-					echo "<li><a href=\"?m={$path}\"><img src=\"/";
-					if($element["type"] == "directory")
-						echo 'folder';
-					if($element["type"] == "link")
-						echo 'link';
-					if($element["type"] == "video")
-						echo 'video';
-					if($element["type"] == "audio")
-						echo 'audio';
-					echo ".svg\">{$name}</a></li>";
+					$title = ($element["type"]=="link"?"title=\"{$element["content"]}\"":"");
+					echo "<li><a href=\"?m={$path}\"><img {$title} src=\"/{$element["type"]}.svg\">{$name}</a></li>";
 				}
 			}
 			echo '</ul>';
