@@ -28,7 +28,7 @@ if(isset($_COOKIE['logged_in'])) {
 			$users = get_data("users");
 			$user = $users[$hashes[$_COOKIE['logged_in']]];
 			$movies = get_data("movies");
-			$movie = find_movie($movies, $_GET['a']);
+			$movie = find_movie($movies, str_replace('_', ' ', $_GET['a']));
 			if($movie != -1) {
 				if($movie["type"] == "audio") {
 					if(strlen($movie['age_limit']) == 0 || strlen($user['birthday']) == 0 || intval($movie['age_limit']) <= intval($user['birthday'])) {

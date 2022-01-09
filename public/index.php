@@ -25,7 +25,7 @@ if(isset($_COOKIE['logged_in'])) {
 	$hashes = get_data("hashes");
 	if(isset($hashes[$_COOKIE['logged_in']])) {
 		$users = get_data("users");
-		$user = $users[$hashes[$_COOKIE['logged_in']]];
+		$user = &$users[$hashes[$_COOKIE['logged_in']]];
 		$repeat = "off";
 		$next = "off";
 		$volume = "0.5";
@@ -142,7 +142,7 @@ clear: both;
 <?php
 		$location = "";
 		if(isset($_GET['m']))
-			$location = $_GET['m'];
+			$location = str_replace('_', ' ', $_GET['m']);
 		$movies = get_data("movies");
 		$movie = find_movie($movies, $location);
 		if($movie == -1) {
@@ -158,6 +158,11 @@ clear: both;
 		}
 		echo '</header>';
 		if($movie["type"] == "video" || $movie["type"] == "audio") {
+			if(isset($_GET['f'])) {
+				array_push($user["favourites"], $location);
+				set_data("users", $users);
+			}
+			$location = str_replace(' ', '_', $location);
 			$next_off_checked = ($next=="off"?"checked":"");
 			$next_directory_checked = ($next=="directory"?"checked":"");
 			$next_all_checked = ($next=="all"?"checked":"");
@@ -187,6 +192,8 @@ clear: both;
 <input type="radio" name="r" value="on" id="repeat-on" value="on" <?php echo $repeat_on_checked; ?>><label for="repeat-on">Tak</label>
 <span>|</span>
 <input type="submit" value="ok">
+<span>|</span>
+<input type="submit" name="f" value="⭐">
 <span>|</span>
 <input type="submit" name="e" value="pomiń →" id="end">
 <input type="hidden" name="v" value="<?php echo $volume; ?>" id="volume">
@@ -219,9 +226,9 @@ document.getElementsByTagName('audio')[0].currentTime = <?php echo $time; ?>;
 			echo '<ul>';
 			foreach($movie["content"] as $name => $element) {
 				if(strlen($element["age_limit"]) == 0 || strlen($user["birthday"]) == 0 || intval($element["age_limit"]) <= intval($user["birthday"])) {
-					$path = (strlen($location)>0?$location.'/'.$name:$name);
+					$path = str_replace(' ', '_', (strlen($location)>0?$location.'/'.$name:$name));
 					$title = ($element["type"]=="link"?"title=\"{$element["content"]}\"":"");
-					echo "<li><a href=\"?m={$path}\"><img {$title} src=\"/{$element["type"]}.svg\">{$name}</a></li>";
+					echo "<li><a href=\"?m={$path}\" {$title}><img src=\"/{$element["type"]}.svg\">{$name}</a></li>";
 				}
 			}
 			echo '</ul>';

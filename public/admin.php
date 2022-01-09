@@ -11,9 +11,15 @@ function printhtmldisk($disk, $name="") {
 					echo ',<br>    ';
 				$first = false;
 				$rvalue = $value;
-				if(is_array($rvalue))
+				$disabled = "";
+				$iname = "name=\"{$name}/{$file}/{$key}\"";
+				if(is_array($rvalue)) {
 					$rvalue = "Array";
-				echo "\"{$key}\" => \"{$rvalue}\"";
+					$disabled = "disabled";
+					$iname = "";
+				}
+				$iname = str_replace(" ", "_", $iname);
+				echo "\"{$key}\" => \"<input type=\"text\" {$iname} value=\"{$rvalue}\" {$disabled}>\"";
 			}
 			echo "<br>]</div></summary>";
 			printhtmldisk($data, $name.'/'.$file);
@@ -26,9 +32,15 @@ function printhtmldisk($disk, $name="") {
 					echo ',<br>    ';
 				$first = false;
 				$rvalue = $value;
-				if(is_array($rvalue))
+				$disabled = "";
+				$iname = "name=\"{$name}/{$file}/{$key}\"";
+				if(is_array($rvalue)) {
 					$rvalue = "Array";
-				echo "\"{$key}\" => \"{$rvalue}\"";
+					$disabled = "disabled";
+					$iname = "";
+				}
+				$iname = str_replace(" ", "_", $iname);
+				echo "\"{$key}\" => \"<input type=\"text\" {$iname} value=\"{$rvalue}\" {$disabled}>\"";
 			}
 			echo "<br>]</div>";
 		}
@@ -37,12 +49,16 @@ function printhtmldisk($disk, $name="") {
 	echo '</ul>';
 }
 function updategetdisk(&$disk, $name="") {
-	foreach($disk['content'] as $file => $data) {
-		foreach($data as $key => $value) {
-		}
-		if($data["type"] == "directory") {
+	foreach($disk['content'] as $file => &$data) {
+		if($data["type"] == "directory")
 			updategetdisk($data, $name.'/'.$file);
-		} else {
+		foreach($data as $key => &$value) {
+			if(!is_array($value)) {
+				$iname = "{$name}/{$file}/{$key}";
+				$iname = str_replace(" ", "_", $iname);
+				if(isset($_POST[$iname]))
+					$value = $_POST[$iname];
+			}
 		}
 	}
 }
@@ -158,10 +174,12 @@ li {
 font-size: large;
 margin-top: 7px;
 margin-left: 40px;
+cursor: default;
 }
 li.directory {
 list-style-type: none;
 margin-left: 20px;
+cursor: pointer;
 }
 img {
 height: 20px;
@@ -209,7 +227,10 @@ font-size: 1.2em;
 th {
 font-size: 1.1em;
 }
-input {
+section.small input {
+width: calc(100% - 20px);
+}
+input[value=Save] {
 width: calc(100% - 20px);
 }
 input[type=submit] {
