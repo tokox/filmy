@@ -54,6 +54,7 @@ if(isset($_COOKIE['logged_in'])) {
 		$path = "";
 		$age_limit = (isset($_POST['age_limit'])?$_POST['age_limit']:"");
 		if(isset($_POST['upload'])) {
+			$type = "";
 			if(!isset($_FILES['file'])) {
 				$error_file .= "<br>Musisz wybrać plik!";
 			} else {
@@ -62,20 +63,34 @@ if(isset($_COOKIE['logged_in'])) {
 				} else {
 					if($_FILES['file']['size'] == 0)
 						$error_file .= "<br>Plik nie może być pusty!";
+					if(strpos($_FILES['file']['type'], "audio") == 0)
+						$type = "audio";
+					else if(strpos($_FILES['file']['type'], "video") == 0)
+						$type = "video";
+					else
+						$error_file .= "<br>Plik musi być typu audio/* lub video/*!";
 				}
 			}
 			if(!isset($_POST['path'])) {
 				$error_path .= "<br>Musisz podać ścieżkę!";
 			} else {
+				$path = $_POST['path'];
 				if(find_movie($movies, $path) != -1)
 					$error_path .= "<br>Plik o tej nazwie już istnieje na serwerze!";
+				$paths = explode('/', $path);
+				foreach($paths as $e) {
+					if(strlen($e) == 0) {
+						$error_path .= "<br>Nazwa pliku/katalogu nie może być pusta!";
+						break;
+					}
+				}
 			}
 			if($age_limit != "" && !is_integer($age_limit))
 				$error_limit .= "<br>Limit wiekowy musi być liczbą!";
 			else if(intval($age_limit) < 0)
 				$error_limit .= "<br>Limit wiekowy musi być dodatni!";
 			if(strlen($error_path) == 0 && strlen($error_file) == 0 && strlen($error_limit) == 0) {
-				create_movie($movies, $path, ["type" => $type, "mime_type" => $_FILES['file']['type'], "path" => "", "content" => $file);
+				create_movie($movies, $path, ["type" => $type, "mime_type" => $_FILES['file']['type'], "age_limit" => $age_limit, "path" => "", "content" => $file]);
 				set_data("movies", $movies);
 				file_put_contents('../movies/uploaded/'.strval(time()).'.'.pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION), file_get_contents($_FILES['file']['tmp_name']));
 			}
