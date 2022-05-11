@@ -116,8 +116,8 @@ padding: 0;
 <?php
 		$movies = get_data("movies");
 		for($i = 0; $i < count($user["favourites"]); $i++) {
-			$el = str_replace(' ', '_', $user["favourites"][$i]);
-			if(isset($_POST[$el.'-delete'])) {
+			$el = rawurlencode($user["favourites"][$i]);
+			if(isset($_POST[$el.'/~delete'])) {
 				array_splice($user["favourites"], $i, 1);
 				$i--;
 				continue;
@@ -129,7 +129,7 @@ padding: 0;
 				continue;
 			}
 			$name = explode('/', $user["favourites"][$i])[substr_count($user["favourites"][$i], '/')];
-			echo "<li><a href=\"/?m={$el}\"><img src=\"/{$movie["type"]}.svg\">{$name}</a><input type=\"submit\" name=\"{$el}-delete\" value=\"Usuń\"></li>";
+			echo "<li><a href=\"/?m={$el}\"><img src=\"/{$movie["type"]}.svg\">{$user["favourites"][$i]}</a><input type=\"submit\" name=\"{$el}-delete\" value=\"Usuń\"></li>";
 		}
 ?>
 </ul>

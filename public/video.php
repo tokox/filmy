@@ -1,61 +1,30 @@
 <?php
-function find_movie($movies, $code) {
-        $codes = explode('/', $code);
-        $movie = $movies;
-        for($i = 0; $i < count($codes) && strlen($code); $i++) {
-                $movie = $movie["content"];
-                if(!isset($movie[$codes[$i]]))
-                        return -1;
-                $movie = $movie[$codes[$i]];
-                if($movie["type"] == "link") {
-                        $movie = find_movie($movies, $movie["content"]);
-                        if($movie == -1)
-                                return -1;
-                }
-        }
-        return $movie;
-}
-function get_data($file) {
-	return json_decode(file_get_contents("../data/".$file.".json"), true);
-}
-function set_data($file, $data) {
-	file_put_contents("../data/".$file.".json", json_decode($data, JSON_PRETTY_PRINT));
-}
-if(isset($_COOKIE['logged_in'])) {
-	$hashes = get_data("hashes");
-	if(isset($hashes[$_COOKIE['logged_in']])) {
-		if(isset($_GET['v'])) {
-			$users = get_data("users");
-			$user = $users[$hashes[$_COOKIE['logged_in']]];
-			$movies = get_data("movies");
-			$movie = find_movie($movies, str_replace('_', ' ', $_GET['v']));
-			if($movie != -1) {
-				if($movie["type"] == "video") {
-					if(strlen($movie['age_limit']) == 0 || strlen($user['birthday']) == 0 || intval($movie['age_limit']) <= intval($user['birthday'])) {
-						header("Content-Type: ".$movie['mime_type']);
-						echo file_get_contents("../movies/".$movie['content']);
-					} else {
-						header("Content-Type: video/mp4");
-						echo file_get_contents("../data/video/age_limit_exceeded.mp4");
-					}
-				} else {
-					header("Content-Type: video/mp4");
-					echo file_get_contents("../data/video/file_type_is_not_video.mp4");
-				}
-			} else {
-				header("Content-Type: video/mp4");
-				echo file_get_contents("../data/video/video_not_exists.mp4");
-			}
-		} else {
-			header("Content-Type: video/mp4");
-			echo file_get_contents("../data/video/video_not_specified.mp4");
-		}
-	} else {
-		header("Content-Type: video/mp4");
-		echo file_get_contents("../data/video/invalid_login_hash.mp4");
-	}
-} else {
-	header("Content-Type: video/mp4");
-	echo file_get_contents("../data/video/not_logged.mp4");
-}
+include "../data/functions.php";
+
+if(!isset($_COOKIE['logged']))
+	error_exit_video('not_logged');
+
+$hashes = get_data("hashes");
+$users = get_data("users");
+
+if(!isset($hashes[$_COOKIE['logged']]) || !isset($users[$hashes[$_COOKIE['logged']]['login']]))
+	error_exit_video('invalid_login_hash');
+
+if(!isset($_GET['v']))
+	error_exit_video('video_not_specified');
+
+$user =& $users[$hashes[$_COOKIE['logged']]['login']];
+$movie = find_movie(get_data("movies"), $_GET['a']);
+
+if($movie == -1)
+	error_exit_video('video_not_exists');
+
+if($movie["type"] != "video")
+	error_exit_video('file_type_is_not_video');
+
+if(strlen($movie['age_limit']) != 0 && strlen($user['birthday']) != 0 && (time()-strtotime($user['birthday'])) >= (intval($movie['age_limit'])*31536000))
+	error_exit_video('age_limit_exceeded');
+
+header("Content-Type: ".$movie['mime_type']);
+echo get_movie($movie['content']);
 ?>
